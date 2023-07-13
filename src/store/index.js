@@ -1,19 +1,11 @@
 import Vue from "vue";
 import Vuex from "vuex";
+import mAuth from "@/store/modules/mAuth";
+import mCourses from "@/store/modules/mCourses";
+import mReq from "@/store/modules/mReq";
 
 Vue.use(Vuex);
 
 export default new Vuex.Store({
-  state: { isAuthenticated: false, error: null },
-  getters: {},
-  mutations: {
-    changeAuth(state, payload) {
-      state.isAuthenticated = payload;
-    },
-    setError(state, errorMessage) {
-      state.error = errorMessage;
-    },
-  },
-  actions: {},
-  modules: {},
+  modules: { mAuth, mCourses, mReq },
 });

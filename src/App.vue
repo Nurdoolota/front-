@@ -9,15 +9,6 @@ export default {};
 </script>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-
 /*Обнуление*/
 * {
   padding: 0;
@@ -58,8 +49,8 @@ ul {
   min-height: 100%;
 }
 
-[class*="__container"] {
-  max-width: 1177px;
+[class*="container"] {
+  max-width: 1130px;
   margin: 0px auto;
   padding: 0px 15px;
 } */

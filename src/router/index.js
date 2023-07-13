@@ -1,36 +1,50 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
-import store from "@/store/index";
-import RegistrationPage from "@/views/RegistrationPage.vue";
-import AuthorizePage from "@/views/AuthorizePage.vue";
+import store from "@/store";
 import CoursesPage from "@/views/CoursesPage.vue";
+import CoursePage from "@/views/CoursePage.vue";
 import ErrorPage from "@/views/ErrorPage.vue";
+import rAuth from "./rAuth";
+import PersonalPage from "@/views/PersonalPage";
+import AdminPage from "@/views/AdminPage.vue";
 
 Vue.use(VueRouter);
 
 const routes = [
+  ...rAuth,
   {
     path: "/",
+    redirect: "/courses",
+  },
+  {
+    path: "/courses",
     name: "courses",
     component: CoursesPage,
     meta: { requiresAuth: true },
   },
   {
-    path: "/registration",
-    name: "registration",
-    component: RegistrationPage,
-    meta: { guest: true },
-  },
-  {
-    path: "/authorization",
-    name: "authorization",
-    component: AuthorizePage,
-    meta: { guest: true },
-  },
-  {
     path: "*",
     name: "error",
     component: ErrorPage,
+  },
+  {
+    path: "/personal",
+    name: "personal",
+    component: PersonalPage,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/admin",
+    name: "admin",
+    component: AdminPage,
+    meta: { requiresAuth: true, isAdmin: true },
+  },
+  {
+    path: "/courses/:id",
+    name: "course",
+    component: CoursePage,
+    props: true,
+    meta: { requiresAuth: true },
   },
 ];
 
@@ -40,30 +54,25 @@ const router = new VueRouter({
   routes,
 });
 
-async function sendGetRequest(url) {
-  const response = await fetch(url, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-  });
-
-  return response;
-}
+console.log(process.env.BASE_URL);
 
 router.beforeEach(async (to, from, next) => {
-  const response = await sendGetRequest(
-    "http://localhost:3000/authentication/"
-  );
-  if (response.ok) store.commit("changeAuth", true);
-  else store.commit("changeAuth", false);
+  const response = await store.dispatch("mAuth/authorize");
+  console.log(response);
 
-  if (to.matched.some((record) => record.meta.requiresAuth))
-    if (store.state.isAuthenticated) next();
+  if (response.ok) {
+    store.commit("mAuth/changeAuth", true);
+    store.commit("mAuth/setUser", await response.json());
+  } else store.commit("mAuth/changeAuth", false);
+
+  if (to.meta.requiresAuth)
+    if (store.getters["mAuth/getAuth"]) next();
     else next({ name: "authorization" });
-  else if (to.matched.some((record) => record.meta.guest))
-    if (!store.state.isAuthenticated) next();
+  else if (to.meta.guest)
+    if (!store.getters["mAuth/getAuth"]) next();
+    else next(from);
+  if (to.meta.isAdmin)
+    if (store.getters["mAuth/getRole"] === "ADMIN") next();
     else next(from);
   else next();
 });
