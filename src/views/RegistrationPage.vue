@@ -6,7 +6,7 @@
           <h3>Добро пожаловать!</h3>
           <p>Введите свои данные для входа в аккаунт</p>
         </div>
-        <ValidationObserver v-slot="{ handleSubmit }">
+        <ValidationObserver ref="observer">
           <form @submit.prevent class="form" method="post">
             <ValidationProvider
               class="form__validator"
@@ -24,7 +24,10 @@
               rules="required|email"
               v-slot="{ errors }"
             >
-              <form-input v-model.trim="dataReg.email" label="Email" />
+              <form-input
+                v-model.trim="dataReg.email"
+                label="Email"
+              />
               <span>{{ errors[0] }}</span>
             </ValidationProvider>
             <ValidationProvider
@@ -53,7 +56,7 @@
               <span class="form__error-message">{{ errors[0] }}</span>
             </ValidationProvider>
             <form-button
-              @click="handleSubmit(register)"
+              @click="validate"
               label="Зарегистрироваться"
               classButton="btn__blue-white button__auth"
             />
@@ -79,12 +82,11 @@ import { ValidationObserver, ValidationProvider } from "vee-validate";
 import "@/validators/validation-rules";
 import FormInput from "@/components/FormInput.vue";
 import FormButton from "@/components/FormButton.vue";
-import mixAuth from "@/mixins/mixAuth";
+import { mapActions } from "vuex";
 
 export default {
   name: "RegistrationPage",
   components: { ValidationProvider, ValidationObserver, FormInput, FormButton },
-  mixins: [mixAuth],
   data() {
     return {
       dataReg: {
@@ -96,7 +98,15 @@ export default {
       error: null,
     };
   },
-  methods: {},
+  methods: {
+    ...mapActions("mAuth", ["login"]),
+    async validate() {
+      const success = await this.$refs.observer.validate();
+      if (success) {
+        await this.register(this.dataReg);
+      }
+    },
+  },
 };
 </script>
 

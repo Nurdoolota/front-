@@ -68,6 +68,12 @@
               :key="course.id"
               :course="course"
               :imageUrl="getCourseImageUrl(course.id)"
+              @click="
+                $router.push({
+                  name: 'course',
+                  params: { id: course.id },
+                })
+              "
             />
           </div>
           <h2 v-if="!courses.length" class="error-message">Курсов нету</h2>
@@ -79,32 +85,55 @@
 
 <script>
 import CourseElement from "@/components/CourseElement.vue";
-import mixAuth from "@/mixins/mixAuth";
 import FormButton from "@/components/FormButton.vue";
-import mixCourses from "@/mixins/mixCourses";
-import FormInput from "@/components/FormInput.vue";
 import HeaderElement from "@/components/HeaderElement.vue";
+import mixCourses from "@/mixins/mixCourses";
+import { mapActions } from "vuex";
 export default {
   components: {
     CourseElement,
     FormButton,
-    FormInput,
     HeaderElement,
   },
-  mixins: [mixAuth, mixCourses],
+  mixins: [mixCourses],
   data() {
-    return {
-      courses: [
-        { name: "afsd", description: "afdfdjksafakfjlasklfkaslkdfasflkjaslss" },
-        { name: "afsd", description: "afdfdjksafakfjlasklfkaslkdfasflkjaslss" },
-        { name: "afsd", description: "afdfdjksafakfjlasklfkaslkdfasflkjaslss" },
-      ],
-    };
+    return {};
   },
   mounted() {
-    // this.courses = this.getCourses();
+    this.courses = this.getCourses();
   },
-  methods: {},
+  computed: {},
+  methods: {
+    ...mapActions("mReq", ["sendRequest"]),
+    async logOut() {
+      try {
+        const response = await this.sendRequest({
+          request: "POST",
+          url: "auth/log-out",
+        });
+        if (!response.ok) throw new Error("Ошибка при выходе");
+        this.$router.push("/authorization");
+      } catch (error) {
+        this.error = error.message;
+        console.log(error);
+      }
+    },
+    async getCourses() {
+      try {
+        const response = await this.sendRequest({
+          request: "GET",
+          url: "subjects",
+        });
+        if (!response.ok) throw new Error("Ошибка при получении курсов");
+        this.courses = await response.json();
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    getCourseImageUrl(id) {
+      return `${process.env.VUE_APP_BACKEND_URL}photo/${id}`;
+    },
+  },
 };
 </script>
 

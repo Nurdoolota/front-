@@ -4,22 +4,12 @@
       <input
         class="text-field__input"
         :value="value"
-        :type="type"
         @input="input"
-        placeholder="placeholderInput"
+        :type="type"
+        :placeholder="placeholderInput"
       />
       <label class="text-field__label">{{ label }}</label>
     </div>
-    <!-- <div class="text-field">
-      <label class="text-field__label">{{ label }}</label>
-      <input
-        class="text-field__input"
-        :placeholder="placeholderInput"
-        :value="value"
-        @input="input"
-        :type="type"
-      />
-    </div> -->
   </div>
 </template>
 
@@ -43,7 +33,6 @@ export default {
       type: String,
       default: "text",
     },
-    autocomplete: {},
   },
   methods: {
     input(event) {
@@ -61,12 +50,12 @@ export default {
 }
 
 .text-field {
-  margin-bottom: 10px;
+  margin-bottom: 1rem;
 }
 
 .text-field__label {
   display: block;
-  /* margin-bottom: 0.25rem; */
+  margin-bottom: 0.25rem;
   color: #212529;
 }
 
@@ -77,7 +66,8 @@ export default {
   font-size: 14px;
   font-weight: 400;
   line-height: 19px;
-  padding: 17px 0 17px 25px;
+  padding: 0.375rem 0.75rem;
+  /* margin: 10px; */
   color: #212529;
   background-color: #fff;
   background-clip: padding-box;
@@ -85,6 +75,13 @@ export default {
   border-radius: 100px;
   transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
+
+/* .text-field__input[type="search"]::-webkit-search-decoration,
+.text-field__input[type="search"]::-webkit-search-cancel-button,
+.text-field__input[type="search"]::-webkit-search-results-button,
+.text-field__input[type="search"]::-webkit-search-results-decoration {
+  -webkit-appearance: none;
+} */
 
 .text-field__input::placeholder {
   color: #212529;
@@ -110,11 +107,11 @@ export default {
   position: relative;
 }
 
-/* .text-field_floating .text-field__input {
+.text-field_floating .text-field__input {
   height: calc(3.5rem + 2px);
   line-height: 1.25;
   padding: 1rem 0.75rem;
-} */
+}
 
 .text-field_floating .text-field__label {
   position: absolute;

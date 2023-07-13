@@ -16,16 +16,14 @@
                 id="file-input"
               />
               <span>{{ errors[0] }}</span>
+              <img :src="previewImage" alt="" />
             </ValidationProvider>
             <ValidationProvider
               class="form__validator"
               rules="required"
               v-slot="{ errors }"
             >
-              <form-input
-                v-model.trim="courseName"
-                placeholderInput="Название"
-              />
+              <form-input v-model.trim="dataSend.name" label="Название" />
               <span>{{ errors[0] }}</span>
             </ValidationProvider>
             <ValidationProvider
@@ -34,8 +32,8 @@
               v-slot="{ errors }"
             >
               <form-input
-                v-model.trim="description"
-                placeholderInput="Описание"
+                v-model.trim="dataSend.description"
+                label="Описание"
               />
               <span>{{ errors[0] }}</span>
             </ValidationProvider>
@@ -45,31 +43,25 @@
       </template>
       <template v-slot:footer>
         <form-button
-          classButton="btn__blue-white"
-          placeholderInput=""
           label="Создать"
           @click="validateAndCreateCourse"
           type="submit"
         />
       </template>
     </modal-window>
-    <div class=""></div>
     <form-button
-      classButton="btn__blue-white"
+      class="courses__button"
       @click="$router.push({ name: 'courses' })"
       label="Курсы"
     />
     <form-button
-      classButton="btn__blue-white"
+      v-if="role !== `USER`"
+      class="courses__button"
       @click="openModal"
       label="Создать курс"
     />
 
-    <form-button
-      classButton="btn__blue-white"
-      @click="$router.push({ name: 'admin' })"
-      label="Админка"
-    />
+    <form-button @click="$router.push({ name: 'admin' })" label="Админка" />
   </div>
 </template>
 
@@ -79,9 +71,9 @@ import ModalWindow from "@/components/ModalWindow.vue";
 import FormInput from "@/components/FormInput.vue";
 import { ValidationObserver, ValidationProvider } from "vee-validate";
 import "@/validators/validation-rules";
-import mixAuth from "@/mixins/mixAuth";
 import mixCourses from "@/mixins/mixCourses";
 import mixModal from "@/mixins/mixModal";
+import { mapGetters, mapActions } from "vuex";
 
 export default {
   components: {
@@ -91,13 +83,27 @@ export default {
     ValidationProvider,
     ValidationObserver,
   },
-  mixins: [mixAuth, mixCourses, mixModal],
+  mixins: [mixCourses, mixModal],
   data() {
-    return {};
+    return {
+      dataSend: {
+        name: "",
+        description: "",
+      },
+      FILE: null,
+      previewImage: null,
+    };
+  },
+  computed: {
+    ...mapGetters("mAuth", ["getUser"]),
+    role() {
+      return this.getUser.role;
+    },
   },
   methods: {
+    ...mapActions("mReq", ["sendRequest"]),
     clearData() {
-      this.courseNamename = "";
+      this.name = "";
       this.description = "";
       this.FILE = null;
       this.closeModal();
@@ -106,6 +112,51 @@ export default {
       this.$refs.observer.validate().then((success) => {
         if (success && this.FILE) this.upload(this.dataSend, this.FILE);
       });
+    },
+    async upload(dataSend, FILE, id = null) {
+      try {
+        if (id === null) {
+          const courseData = await this.sendRequest({
+            request: "POST",
+            url: "subjects",
+            data: dataSend,
+          });
+          const courseId = await courseData.json();
+          id = courseId.id;
+        } else await this.sendRequest("PATCH", `subjects/${id}`, dataSend);
+
+        const response = await fetch(
+          `${process.env.VUE_APP_BACKEND_URL}photo/upload/${id}`,
+          {
+            method: "POST",
+            credentials: "include",
+            headers: {},
+            body: FILE,
+          }
+        );
+
+        if (response.ok) {
+          this.closeModal();
+          console.log(response);
+        } else {
+          throw new Error("Ошибка при загрузке файла.");
+        }
+      } catch (error) {
+        console.error(error);
+        this.error = error;
+      }
+    },
+    fileChange(event) {
+      let data = new FormData();
+      let file = event.target.files[0];
+      data.append("file", file);
+      this.FILE = data;
+      let fileReader = new FileReader();
+      fileReader.onload = function () {
+        this.previewImage = fileReader.result;
+      };
+
+      fileReader.readAsDataURL(event.target.files[0]);
     },
   },
 };

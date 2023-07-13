@@ -1,6 +1,5 @@
 <template>
-  <div>
-    <div class="course-wrapper">
+  <div class="course-wrapper">
       <!-- <a href="#"> -->
       <div class="course-header">
         <div class="course-title">
@@ -30,18 +29,6 @@
       />
       <!-- </a> -->
     </div>
-    <!--  -->
-    <!-- <a href="" class="course">
-      <img
-        :src="imageUrl"
-        alt="Здесь должна быть картинка"
-        class="course__image"
-      />
-      <div class="course__name">Курс: {{ course.name }}</div>
-      <div class="course__author">Описание: {{ course.description }}</div>
-    </a> -->
-    <slot></slot>
-  </div>
 </template>
 
 <script>
@@ -56,7 +43,12 @@ export default {
     course: Object,
     imageUrl: String,
   },
-  methods: {},
+  methods: {
+    click() {
+      this.$emit("click");
+    },
+    imageUrl: String,
+  },
 };
 </script>
 <style scoped>
@@ -91,7 +83,6 @@ export default {
   align-content: flex-start;
   width: 100%;
   margin: 10px 0;
-  /* padding: 5px; */
 }
 .course__volume a {
   line-height: 19px;
@@ -99,7 +90,6 @@ export default {
 
 .display-block {
   display: block;
-  /* padding: 10px, 15px, 10px, 15px; */
   margin-right: 10px;
   padding: 10px 15px;
   border-radius: 100px;

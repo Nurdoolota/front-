@@ -56,15 +56,28 @@ import { ValidationObserver, ValidationProvider } from "vee-validate";
 import "@/validators/validation-rules";
 import FormInput from "@/components/FormInput.vue";
 import FormButton from "@/components/FormButton.vue";
-import mixAuth from "@/mixins/mixAuth";
+import { mapActions } from "vuex";
 
 export default {
   components: { ValidationProvider, ValidationObserver, FormInput, FormButton },
-  mixins: [mixAuth],
   data() {
-    return {};
+    return {
+      dataAuth: {
+        email: "",
+        password: "",
+      },
+      error: null,
+    };
   },
-  methods: {},
+  methods: {
+    ...mapActions("mAuth", ["login"]),
+    async validate() {
+      const success = await this.$refs.observer.validate();
+      if (success) {
+        await this.login(this.dataAuth);
+      }
+    },
+  },
 };
 </script>
 
@@ -73,6 +86,80 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+/* .form__validator {
+  text-align: center;
+} */
+template {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.form-conteiner {
+  display: flex;
+  /* flex-wrap: wrap; */
+  height: 660px;
+  margin: 50px;
+  border-radius: 100px;
+  background-color: #ff80;
+  opacity: 0.5px;
+  box-shadow: 1px 1px 100px 0px #00000014;
+}
+
+.form-wrapper {
+}
+
+.form-input {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 40%;
+  padding: 95px;
+  border-radius: 100px;
+  background-color: #4640de;
+  color: white;
+}
+
+.form-input h3 {
+  font-size: 20px;
+  line-height: 27px;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+.form-input p {
+  text-align: center;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 19px;
+  margin-bottom: 20px;
+}
+
+.form-input__active .button__click {
+}
+
+.form-input__active {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 60%;
+}
+
+.form-input__active {
+}
+
+.form-input__title {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.form-input__title h3 {
+  font-family: Gadugi;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 40px;
 }
 /* .form__validator {
   text-align: center;
