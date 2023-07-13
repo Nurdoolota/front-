@@ -1,50 +1,76 @@
 <template>
-  <div>
-    <ValidationObserver v-slot="{ handleSubmit }">
-      <form @submit.prevent class="form" method="post">
-        <ValidationProvider
-          class="form__validator"
-          rules="required|email"
-          v-slot="{ errors }"
-        >
-          <form-input v-model.trim="email" label="Почта" />
-          <span>{{ errors[0] }}</span>
-        </ValidationProvider>
-        <ValidationProvider
-          class="form__validator"
-          rules="required"
-          v-slot="{ errors }"
-        >
-          <form-input v-model.trim="name" label="Логин" />
-          <span>{{ errors[0] }}</span>
-        </ValidationProvider>
-        <ValidationProvider
-          class="form__validator"
-          rules="required|min:7"
-          vid="confirmation"
-          v-slot="{ errors }"
-        >
-          <form-input v-model.trim="password" label="Пароль" />
-          <span>{{ errors[0] }}</span>
-        </ValidationProvider>
-        <ValidationProvider
-          class="form__validator"
-          rules="required|confirmed:confirmation"
-          v-slot="{ errors }"
-        >
-          <form-input
-            v-model.trim="confirmPassword"
-            label="Подтверждение пароля"
-          />
-          <span class="form__error-message">{{ errors[0] }}</span>
-        </ValidationProvider>
+  <div class="form-wrapper">
+    <div class="form-conteiner">
+      <div class="form-input__active">
+        <div class="form-input__title">
+          <h3>Добро пожаловать!</h3>
+          <p>Введите свои данные для входа в аккаунт</p>
+        </div>
+        <ValidationObserver v-slot="{ handleSubmit }">
+          <form @submit.prevent class="form" method="post">
+            <ValidationProvider
+              class="form__validator"
+              rules="required"
+              v-slot="{ errors }"
+            >
+              <form-input
+                v-model.trim="dataReg.name"
+                label="Имя пользователя"
+              />
+              <span>{{ errors[0] }}</span>
+            </ValidationProvider>
+            <ValidationProvider
+              class="form__validator"
+              rules="required|email"
+              v-slot="{ errors }"
+            >
+              <form-input v-model.trim="dataReg.email" label="Email" />
+              <span>{{ errors[0] }}</span>
+            </ValidationProvider>
+            <ValidationProvider
+              class="form__validator"
+              rules="required|min:7"
+              vid="confirmation"
+              v-slot="{ errors }"
+            >
+              <form-input
+                v-model.trim="dataReg.password"
+                label="Пароль"
+                type="password"
+              />
+              <span>{{ errors[0] }}</span>
+            </ValidationProvider>
+            <ValidationProvider
+              class="form__validator"
+              rules="required|confirmed:confirmation"
+              v-slot="{ errors }"
+            >
+              <form-input
+                v-model.trim="confirmPassword"
+                label="Повторите пароль"
+                type="password"
+              />
+              <span class="form__error-message">{{ errors[0] }}</span>
+            </ValidationProvider>
+            <form-button
+              @click="handleSubmit(register)"
+              label="Зарегистрироваться"
+              classButton="btn__blue-white button__auth"
+            />
+            <p v-if="error" class="form__error-message">{{ error }}</p>
+          </form>
+        </ValidationObserver>
+      </div>
+      <div class="form-input">
+        <h3>Уже есть аккаунт?</h3>
+        <p>Введите свои данные для входа в аккаунт</p>
         <form-button
-          @click="handleSubmit(register)"
-          label="Зарегистрироваться"
+          @click="$router.push({ name: 'authorization' })"
+          label="Войти"
+          classButton="btn__white"
         />
-        <p v-if="error" class="form__error-message">{{ error }}</p>
-      </form>
-    </ValidationObserver>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -53,56 +79,28 @@ import { ValidationObserver, ValidationProvider } from "vee-validate";
 import "@/validators/validation-rules";
 import FormInput from "@/components/FormInput.vue";
 import FormButton from "@/components/FormButton.vue";
-import authentication from "@/mixins/authentication";
+import mixAuth from "@/mixins/mixAuth";
 
 export default {
   name: "RegistrationPage",
   components: { ValidationProvider, ValidationObserver, FormInput, FormButton },
-  mixins: [authentication],
+  mixins: [mixAuth],
   data() {
     return {
-      name: "",
-      email: "",
-      password: "",
+      dataReg: {
+        name: "",
+        email: "",
+        password: "",
+      },
       confirmPassword: "",
       error: null,
     };
   },
-  methods: {
-    async register() {
-      try {
-        const response = await this.sendPostRequest(
-          {
-            email: this.email,
-            name: this.name,
-            password: this.password,
-          },
-          "http://localhost:3000/authentication/register"
-        );
-        console.log(await response.json());
-        if (response.ok) {
-          this.$router.push({ name: "authorization" });
-        } else if (response.status === 400) {
-          throw Error("Ошибка регистрации: Такой пользователь уже существует");
-        } else {
-          throw Error("Неизвестная ошибка");
-        }
-      } catch (error) {
-        this.error = error.message;
-        console.log(error);
-      }
-    },
-  },
+  methods: {},
 };
 </script>
 
 <style>
-.form {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
 .form__validator {
   text-align: center;
 }
